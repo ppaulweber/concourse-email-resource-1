@@ -126,7 +126,17 @@ def get_template_vars(src, payload):
 
 def get_value_from_payload(payload, section, key, default=None, optional=False):
     try:
-        return payload[section][key]
+        value = payload[section][key]
+        env_vars = {}
+        env_vars["$BUILD_ID"] = os.getenv('BUILD_ID', 'BUILD_ID')
+        env_vars["$BUILD_NAME"] = os.getenv('BUILD_NAME', 'BUILD_NAME')
+        env_vars["$BUILD_JOB_NAME"] = os.getenv('BUILD_JOB_NAME', 'BUILD_JOB_NAME')
+        env_vars["$BUILD_PIPELINE_NAME"] = os.getenv('BUILD_PIPELINE_NAME', 'BUILD_PIPELINE_NAME')
+        env_vars["$BUILD_TEAM_NAME"] = os.getenv('BUILD_TEAM_NAME', 'BUILD_TEAM_NAME')
+        env_vars["$ATC_EXTERNAL_URL"] = os.getenv('ATC_EXTERNAL_URL', 'ATC_EXTERNAL_URL')
+        for env_var,env_value in env_vars.items():
+            value = value.replace(env_var, env_value)
+        return value
     except KeyError:
         if not optional:
             raise ValueError("Unable to extract '{}' from '{}'".format(key, section))
